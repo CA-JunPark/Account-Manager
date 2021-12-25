@@ -118,7 +118,7 @@
                         <Insets bottom="10.0" top="10.0" />
                      </VBox.margin>
                      <center>
-                        <Button contentDisplay="CENTER" focusTraversable="false" mnemonicParsing="false" prefHeight="45.0" prefWidth="65.0" text="Edit" BorderPane.alignment="CENTER">
+                        <Button contentDisplay="CENTER" focusTraversable="false" mnemonicParsing="false" onAction="#clickEdit" prefHeight="45.0" prefWidth="65.0" text="Edit" BorderPane.alignment="CENTER">
                            <BorderPane.margin>
                               <Insets />
                            </BorderPane.margin>
