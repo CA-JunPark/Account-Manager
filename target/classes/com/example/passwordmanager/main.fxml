@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="650.0" minHeight="450.0" minWidth="650.0" prefHeight="450.0" prefWidth="650.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.passwordmanager.Controller">
+   <children>
+      <MenuBar>
+         <menus>
+            <Menu mnemonicParsing="false" text="File">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Save as txt file" />
+                  <MenuItem mnemonicParsing="false" text="Open txt file" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Close" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Password">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Change password" />
+               </items>
+            </Menu>
+         </menus>
+      </MenuBar>
+      <HBox fillHeight="false" maxHeight="430.0" maxWidth="650.0" minHeight="430.0" minWidth="650.0" prefHeight="430.0" prefWidth="643.0">
+         <children>
+            <ScrollPane fx:id="scrollPane" prefHeight="450.0" prefWidth="400.0">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </HBox.margin>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <content>
+                  <AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <VBox fx:id="accountList" alignment="CENTER" prefHeight="401.0" prefWidth="359.0" />
+                     </children></AnchorPane>
+               </content>
+            </ScrollPane>
+            <VBox prefHeight="450.0" prefWidth="250.0">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </HBox.margin>
+               <children>
+                  <Pane prefHeight="29.0" prefWidth="231.0">
+                     <opaqueInsets>
+                        <Insets top="5.0" />
+                     </opaqueInsets>
+                     <VBox.margin>
+                        <Insets bottom="5.0" />
+                     </VBox.margin>
+                     <children>
+                        <Button focusTraversable="false" layoutX="178.0" layoutY="2.0" mnemonicParsing="false" onAction="#clickReset" text="Reset" />
+                        <Button focusTraversable="false" layoutX="116.0" layoutY="2.0" mnemonicParsing="false" onAction="#deleteAccount" text="Delete" />
+                     </children>
+                  </Pane>
+                  <FlowPane prefHeight="14.0" prefWidth="231.0">
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                     <children>
+                        <Label prefWidth="55.0" text="Account:" textAlignment="CENTER" />
+                        <TextField id="accountInput" fx:id="accountText" />
+                     </children>
+                  </FlowPane>
+                  <FlowPane layoutX="15.0" layoutY="15.0" prefHeight="14.0" prefWidth="231.0">
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                     <children>
+                        <Label prefWidth="55.0" text="ID:" wrapText="true" />
+                        <TextField fx:id="idText" />
+                     </children>
+                  </FlowPane>
+                  <FlowPane layoutX="10.0" layoutY="45.0" prefHeight="14.0" prefWidth="231.0">
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                     <children>
+                        <Label prefWidth="55.0" text="PW:" />
+                        <TextField fx:id="pwText" />
+                     </children>
+                  </FlowPane>
+                  <Label text="Additional Note:">
+                     <VBox.margin>
+                        <Insets left="5.0" top="10.0" />
+                     </VBox.margin>
+                  </Label>
+                  <TextArea fx:id="additionalText" prefHeight="200.0" prefWidth="200.0">
+                     <VBox.margin>
+                        <Insets left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                  </TextArea>
+                  <BorderPane prefHeight="45.0" prefWidth="200.0">
+                     <right>
+                        <Button mnemonicParsing="false" prefHeight="45.0" prefWidth="65.0" text="Save" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="5.0" />
+                           </BorderPane.margin>
+                        </Button>
+                     </right>
+                     <VBox.margin>
+                        <Insets bottom="10.0" top="10.0" />
+                     </VBox.margin>
+                     <center>
+                        <Button contentDisplay="CENTER" focusTraversable="false" mnemonicParsing="false" prefHeight="45.0" prefWidth="65.0" text="Edit" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets />
+                           </BorderPane.margin>
+                        </Button>
+                     </center>
+                     <left>
+                        <Button mnemonicParsing="false" onAction="#addAccount" prefHeight="45.0" prefWidth="65.0" text="Add" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets left="5.0" />
+                           </BorderPane.margin>
+                        </Button>
+                     </left>
+                  </BorderPane>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>
