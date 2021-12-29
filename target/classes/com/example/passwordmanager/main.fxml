@@ -31,7 +31,7 @@
             </Menu>
             <Menu mnemonicParsing="false" text="Password">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Change password" />
+                  <MenuItem mnemonicParsing="false" onAction="#openChangePwWindow" text="Change password" />
                </items>
             </Menu>
          </menus>
@@ -108,7 +108,7 @@
                   </TextArea>
                   <BorderPane prefHeight="45.0" prefWidth="200.0">
                      <right>
-                        <Button mnemonicParsing="false" prefHeight="45.0" prefWidth="65.0" text="Save" BorderPane.alignment="CENTER">
+                        <Button mnemonicParsing="false" onAction="#clickSave" prefHeight="45.0" prefWidth="65.0" text="Save" BorderPane.alignment="CENTER">
                            <BorderPane.margin>
                               <Insets right="5.0" />
                            </BorderPane.margin>
