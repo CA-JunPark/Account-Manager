@@ -34,8 +34,6 @@ public class AccountButton extends Button {
     public void setPW(String pw){this.pw = pw;}
     public void setAdditional(String additional){this.additional = additional;}
 
-
-
     public String toString(){
         return MessageFormat.format
                 ("{0} \nID: {1} \nPW: {2} \nAdditional Note:\n{3}",

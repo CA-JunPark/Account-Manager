@@ -1,8 +1,5 @@
 package com.example.passwordmanager;
 
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -12,15 +9,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.json.simple.parser.ParseException;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 
-import static javafx.application.Application.launch;
 
 public class Controller {
 
@@ -34,6 +30,22 @@ public class Controller {
     private TextArea additionalText;
     @FXML
     private VBox accountList;
+    @FXML
+    private TextField createPwText;
+    @FXML
+    private TextField createPwConfirmText;
+    @FXML
+    private TextField checkPwText;
+    @FXML
+    private TextField changeCurrentPwText;
+    @FXML
+    private TextField changeNewPwText;
+    @FXML
+    private TextField ChangeNewPwConfirmText;
+    @FXML
+    private TextField resetEmailText;
+    @FXML
+    private TextField resetEmailConfirmText;
 
     public void addAccount(){
 
@@ -53,9 +65,6 @@ public class Controller {
         // add button in the Accounts ArrayList
         PW_Application.Accounts.add(accountButton);
 
-        // sort the Accounts ArrayList by alphabetical order
-        PW_Application.Accounts.sort(new AccountComparator());
-
         // adjust accountList Height
         int listLength = 0;
         for (AccountButton b : PW_Application.Accounts){
@@ -67,7 +76,7 @@ public class Controller {
         accountList.getChildren().clear();
 
         // sort accountList by account name
-        PW_Application.Accounts.sort(new AccountComparator());
+        PW_Application.Accounts.sort((AccountButton a1, AccountButton a2) -> a1.getAccount().compareTo(a2.getAccount()));
 
         // display the button in the window
         for(int i = 0; i < PW_Application.Accounts.size(); i++){
@@ -96,7 +105,7 @@ public class Controller {
         accountList.getChildren().clear();
 
         // sort accountList by account name
-        PW_Application.Accounts.sort(new AccountComparator());
+        PW_Application.Accounts.sort((AccountButton a1, AccountButton a2) -> a1.getAccount().compareTo(a2.getAccount()));
 
         // display the button in the window
         for(int i = 0; i < PW_Application.Accounts.size(); i++){
@@ -212,7 +221,7 @@ public class Controller {
                     // clear accountList
                     accountList.getChildren().clear();
                     // sort accountList by account name
-                    PW_Application.Accounts.sort(new AccountComparator());
+                    PW_Application.Accounts.sort((AccountButton a1, AccountButton a2) -> a1.getAccount().compareTo(a2.getAccount()));
                     // display the button in the window
                     for(int i = 0; i < PW_Application.Accounts.size(); i++){
                         accountList.getChildren().add(PW_Application.Accounts.get(i));
@@ -242,12 +251,123 @@ public class Controller {
             stage.show();
         }
         catch(Exception e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error");
-            alert.setContentText("Account is not selected");
-            alert.showAndWait();
+            AlertErrorWindow("Account is not selected");
         }
+    }
+
+    public void clickSave(){
+
+    }
+
+    public void createPw(){
+        String pw = createPwText.getText();
+        String confirm = createPwConfirmText.getText();
+
+        if (pw.equals(confirm)){
+            // hashing pw and save
+            BCryptPassword.hashPassword(pw);
+
+            // close window
+            Stage currentStage = (Stage) createPwText.getScene().getWindow();
+            currentStage.close();
+        }
+        else{
+            // error message
+            AlertErrorWindow("Password Does Not Match");
+
+            // reset the TextFields
+            createPwText.clear();
+            createPwConfirmText.clear();
+            createPwText.requestFocus();
+        }
+    }
+
+    public void checkPw() throws IOException, ParseException{
+
+        if (new File("pw.json").isFile()){
+            // compare input and hashedPw
+            if (BCryptPassword.checkPw(checkPwText.getText())){
+                PW_Application.pwAccepted = true;
+
+                // close window
+                Stage currentStage = (Stage) checkPwText.getScene().getWindow();
+                currentStage.close();
+
+            } else {
+                // error message
+                AlertErrorWindow("Password Does Not Match");
+                // reset TextField
+                checkPwText.clear();
+                checkPwText.requestFocus();
+            }
+        }
+    }
+
+    public void openChangePwWindow() throws IOException {
+        // Change Password window
+        Stage changePwStage = new Stage();
+        FXMLLoader pwChange = new FXMLLoader(PW_Application.class.getResource("pwChange.fxml"));
+        Scene pwChangeScene = new Scene(pwChange.load());
+        changePwStage.setTitle("Change Password");
+        changePwStage.setScene(pwChangeScene);
+        changePwStage.setResizable(false);
+        changePwStage.showAndWait();
+    }
+
+    public void changePW() throws IOException, ParseException {
+        String currentPW = changeCurrentPwText.getText();
+
+        // check input currentPw is current hashedPw
+        if (BCryptPassword.checkPw(currentPW)){
+            String newPw = changeNewPwText.getText();
+            String newPwConfirm = ChangeNewPwConfirmText.getText();
+            // if newPW is confirmed
+            if (newPw.equals(newPwConfirm)){
+                // change pw
+                BCryptPassword.changePw(newPw);
+
+                // close all the windows
+                Stage ChangePwWindow = (Stage) changeCurrentPwText.getScene().getWindow();
+                ChangePwWindow.close();
+
+                // success message
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Password Changed");
+                alert.setHeaderText("Your Password Has Been Changed");
+                alert.setContentText("Application will be closed");
+                alert.showAndWait();
+
+                // exit application
+                System.exit(0);
+            } else{
+                // New Password Does Not Match error message
+                AlertErrorWindow("New Password Does Not Match");
+
+                // reset
+                changeCurrentPwText.clear();
+                changeNewPwText.clear();
+                ChangeNewPwConfirmText.clear();
+                changeNewPwText.requestFocus();
+
+            }
+        } else{
+            // Current Password Does not Match error message
+            AlertErrorWindow("Current Password Does Not Match");
+
+            // reset
+            changeCurrentPwText.clear();
+            changeNewPwText.clear();
+            ChangeNewPwConfirmText.clear();
+            changeNewPwText.requestFocus();
+        }
+    }
+
+    public static void AlertErrorWindow(String message){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Error");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
 }
