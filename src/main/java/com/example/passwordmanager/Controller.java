@@ -1,5 +1,6 @@
 package com.example.passwordmanager;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -11,11 +12,17 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Comparator;
 
 
 public class Controller {
@@ -42,19 +49,44 @@ public class Controller {
     private TextField changeNewPwText;
     @FXML
     private TextField ChangeNewPwConfirmText;
-    @FXML
-    private TextField resetEmailText;
-    @FXML
-    private TextField resetEmailConfirmText;
 
-    public void addAccount(){
+
+    /** Main */
+    public void refreshAccountList() throws IOException {
+        // update accountsJson
+        updateAccountsJson();
+
+        if (accountList == null){
+            return;
+        }
+
+        // adjust accountList Height
+        int listLength = 0;
+        for (AccountButton b : PW_Application.Accounts){
+            listLength += b.getHeight();
+        }
+        accountList.setPrefHeight(listLength);
+
+        // clear accountList
+        accountList.getChildren().clear();
+
+        // sort accountList by account name
+        PW_Application.Accounts.sort(Comparator.comparing(AccountButton::getAccount));
+
+        // display the button in the window
+        for(int i = 0; i < PW_Application.Accounts.size(); i++){
+            accountList.getChildren().add(PW_Application.Accounts.get(i));
+        }
+    }
+
+    public void addAccount() throws IOException {
 
         String account = accountText.getText();
         String id = idText.getText();
         String pw = pwText.getText();
         String additional = additionalText.getText();
 
-        // create a Button and add it into Accounts
+        // create a Button
         String info = MessageFormat.format
                 ("{0}\nID: {1}\nPW: {2}", account, id, pw);
         AccountButton accountButton = new AccountButton(info, account, id, pw, additional);
@@ -65,52 +97,22 @@ public class Controller {
         // add button in the Accounts ArrayList
         PW_Application.Accounts.add(accountButton);
 
-        // adjust accountList Height
-        int listLength = 0;
-        for (AccountButton b : PW_Application.Accounts){
-            listLength += b.getHeight();
-        }
-        accountList.setPrefHeight(listLength);
-
-        // clear accountList
-        accountList.getChildren().clear();
-
-        // sort accountList by account name
-        PW_Application.Accounts.sort((AccountButton a1, AccountButton a2) -> a1.getAccount().compareTo(a2.getAccount()));
-
-        // display the button in the window
-        for(int i = 0; i < PW_Application.Accounts.size(); i++){
-            accountList.getChildren().add(PW_Application.Accounts.get(i));
-        }
+        // refresh accountList
+        refreshAccountList();
 
         // focus on the newest button
         accountButton.requestFocus();
     }
 
-    public void deleteAccount(){
+    public void deleteAccount() throws IOException {
         // identify the AccountButton
         AccountButton selectedButton = (AccountButton) PW_Application.scene.getFocusOwner();
 
         // remove identified AccountButton from Accounts ArrayList
         PW_Application.Accounts.remove(selectedButton);
 
-        // adjust accountList Height
-        int listLength = 0;
-        for (AccountButton b : PW_Application.Accounts){
-            listLength += b.getHeight();
-        }
-        accountList.setPrefHeight(listLength);
-
-        // clear accountList
-        accountList.getChildren().clear();
-
-        // sort accountList by account name
-        PW_Application.Accounts.sort((AccountButton a1, AccountButton a2) -> a1.getAccount().compareTo(a2.getAccount()));
-
-        // display the button in the window
-        for(int i = 0; i < PW_Application.Accounts.size(); i++){
-            accountList.getChildren().add(PW_Application.Accounts.get(i));
-        }
+        // refresh accountList;
+        refreshAccountList();
     }
 
     public void clickAccount(ActionEvent event){
@@ -137,7 +139,6 @@ public class Controller {
 
     public void clickEdit(){
         try{
-
             // get current selected account
             AccountButton selectedButton = (AccountButton) PW_Application.scene.getFocusOwner();
 
@@ -150,9 +151,9 @@ public class Controller {
             Label accountLabel = new Label("Account:");
             accountLabel.setAlignment(Pos.CENTER_LEFT);
             accountLabel.setPrefWidth(50);
-            TextField accountText = new TextField();
-            accountText.setText(selectedButton.getAccount());
-            accountFlow.getChildren().addAll(accountLabel, accountText);
+            TextField editAccountText = new TextField();
+            editAccountText.setText(selectedButton.getAccount());
+            accountFlow.getChildren().addAll(accountLabel, editAccountText);
 
             // id pane
             FlowPane idFlow = new FlowPane();
@@ -161,9 +162,9 @@ public class Controller {
             Label idLabel = new Label("ID:");
             idLabel.setAlignment(Pos.CENTER_LEFT);
             idLabel.setPrefWidth(50);
-            TextField idText = new TextField();
-            idText.setText(selectedButton.getID());
-            idFlow.getChildren().addAll(idLabel, idText);
+            TextField editIdText = new TextField();
+            editIdText.setText(selectedButton.getID());
+            idFlow.getChildren().addAll(idLabel, editIdText);
 
             // pw pane
             FlowPane pwFlow = new FlowPane();
@@ -172,64 +173,69 @@ public class Controller {
             Label pwLabel = new Label("PW:");
             pwLabel.setAlignment(Pos.CENTER_LEFT);
             pwLabel.setPrefWidth(50);
-            TextField pwText = new TextField();
-            pwText.setText(selectedButton.getPW());
-            pwFlow.getChildren().addAll(pwLabel, pwText);
+            TextField editPwText = new TextField();
+            editPwText.setText(selectedButton.getPW());
+            pwFlow.getChildren().addAll(pwLabel, editPwText);
 
             // additional note pane
             VBox additionalPane = new VBox();
             additionalPane.setPadding(new Insets(0, 10 ,10, 10));
             Label additionalLabel = new Label("Additional Note:");
             additionalLabel.setPadding(new Insets(0, 0, 5, 0));
-            TextArea additionalText = new TextArea();
-            additionalText.setText(selectedButton.getAdditional());
-            additionalPane.getChildren().addAll(additionalLabel, additionalText);
+            TextArea editAdditionalText = new TextArea();
+            editAdditionalText.setText(selectedButton.getAdditional());
+            additionalPane.getChildren().addAll(additionalLabel, editAdditionalText);
 
             // reset button
             Button resetButton = new Button("Reset");
             resetButton.setPrefSize(65,40);
-            resetButton.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent actionEvent) {
-                    accountText.setText(selectedButton.getAccount());
-                    idText.setText(selectedButton.getID());
-                    pwText.setText(selectedButton.getPW());
-                    additionalText.setText(selectedButton.getAdditional());
-                }
+            resetButton.setOnAction(actionEvent -> {
+                editAccountText.setText(selectedButton.getAccount());
+                editIdText.setText(selectedButton.getID());
+                editPwText.setText(selectedButton.getPW());
+                editAdditionalText.setText(selectedButton.getAdditional());
             });
+
             // save button
             Button saveButton = new Button("Save");
             saveButton.setPrefSize(65,40);
-            saveButton.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent actionEvent) {
-                    // get modified texts
-                    String newAccount = accountText.getText();
-                    String newID = idText.getText();
-                    String newPW = pwText.getText();
-                    String newAdditional = additionalText.getText();
+            saveButton.setOnAction(actionEvent -> {
+                // get modified texts
+                String newAccount = editAccountText.getText();
+                String newID = editIdText.getText();
+                String newPW = editPwText.getText();
+                String newAdditional = editAdditionalText.getText();
 
-                    // create new AccountButton
-                    String info = MessageFormat.format
-                            ("{0}\nID: {1}\nPW: {2}", newAccount, newID, newPW);
-                    AccountButton newAccountButton = new AccountButton(info, newAccount, newID, newPW, newAdditional);
+                // create new AccountButton
+                String info = MessageFormat.format
+                        ("{0}\nID: {1}\nPW: {2}", newAccount, newID, newPW);
+                AccountButton newAccountButton = new AccountButton(info, newAccount, newID, newPW, newAdditional);
+                newAccountButton.setOnAction(event -> {
+                    // identify the selected AccountButton
+                    AccountButton newSelectedButton = (AccountButton) event.getSource();
 
-                    // remove selected AccountButton from Accounts ArrayList
-                    PW_Application.Accounts.remove(selectedButton);
-                    // add modified AccountButton
-                    PW_Application.Accounts.add(newAccountButton);
-                    // clear accountList
-                    accountList.getChildren().clear();
-                    // sort accountList by account name
-                    PW_Application.Accounts.sort((AccountButton a1, AccountButton a2) -> a1.getAccount().compareTo(a2.getAccount()));
-                    // display the button in the window
-                    for(int i = 0; i < PW_Application.Accounts.size(); i++){
-                        accountList.getChildren().add(PW_Application.Accounts.get(i));
-                    }
+                    // set the TextFields from the selectedButton
+                    accountText.setText(newSelectedButton.getAccount());
+                    idText.setText(newSelectedButton.getID());
+                    pwText.setText(newSelectedButton.getPW());
+                    additionalText.setText(newSelectedButton.getAdditional());
+                });
 
-                    //close current stage
-                    stage.close();
+                // remove selected AccountButton from Accounts ArrayList
+                PW_Application.Accounts.remove(selectedButton);
+                // add modified AccountButton
+                PW_Application.Accounts.add(newAccountButton);
+                // clear accountList
+                accountList.getChildren().clear();
+                // sort accountList by account name
+                PW_Application.Accounts.sort(Comparator.comparing(AccountButton::getAccount));
+                // display the button in the window
+                for(int i = 0; i < PW_Application.Accounts.size(); i++){
+                    accountList.getChildren().add(PW_Application.Accounts.get(i));
                 }
+
+                //close current stage
+                stage.close();
             });
             // buttons
             FlowPane buttons = new FlowPane();
@@ -259,6 +265,7 @@ public class Controller {
 
     }
 
+    /** Password */
     public void createPw(){
         String pw = createPwText.getText();
         String confirm = createPwConfirmText.getText();
@@ -293,6 +300,14 @@ public class Controller {
                 Stage currentStage = (Stage) checkPwText.getScene().getWindow();
                 currentStage.close();
 
+                // read and refresh Accounts from json
+                readAccountsJson();
+                refreshAccountList();
+
+                // refresh accountList (VBox)
+
+                System.out.println(PW_Application.AccountsJson);
+                System.out.println(PW_Application.Accounts);
             } else {
                 // error message
                 AlertErrorWindow("Password Does Not Match");
@@ -301,6 +316,8 @@ public class Controller {
                 checkPwText.requestFocus();
             }
         }
+
+
     }
 
     public void openChangePwWindow() throws IOException {
@@ -369,5 +386,70 @@ public class Controller {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    /** JSON */
+    public void readAccountsJson() throws IOException, ParseException {
+        // read it if file exists
+        if (new File("accounts.json").isFile()){
+            JSONParser parser = new JSONParser();
+            FileReader reader = new FileReader("accounts.json");
+            Object obj = parser.parse(reader);
+            PW_Application.AccountsJson = (JSONArray) obj;
+
+            PW_Application.AccountsJson.forEach(accountButton -> parseAccountButton((JSONObject) accountButton));
+        }
+    }
+
+    private void parseAccountButton(JSONObject accountButtonJson){
+        JSONObject accountButtonObject = (JSONObject) accountButtonJson.get("accountButton");
+        String account = (String) accountButtonObject.get("account");
+        String id = (String) accountButtonObject.get("id");
+        String pw = (String) accountButtonObject.get("pw");
+        String additional = (String) accountButtonObject.get("additional");
+
+        // create a Button
+        String info = MessageFormat.format
+                ("{0}\nID: {1}\nPW: {2}", account, id, pw);
+        AccountButton accountButton = new AccountButton(info, account, id, pw, additional);
+        accountButton.setOnAction(event -> {
+            // identify the selected AccountButton
+            AccountButton selectedButton = (AccountButton) event.getSource();
+
+            // set the TextFields from the selectedButton
+            accountText.setText(selectedButton.getAccount());
+            idText.setText(selectedButton.getID());
+            pwText.setText(selectedButton.getPW());
+            additionalText.setText(selectedButton.getAdditional());
+        });
+
+        // add it into Accounts (ArrayList)
+        PW_Application.Accounts.add(accountButton);
+    }
+
+    public void updateAccountsJson() throws IOException {
+        PW_Application.AccountsJson.clear();
+
+        // iterate Accounts(ArrayList) to create JSONArray
+        PW_Application.Accounts.forEach(accountButton -> putAccountButton(accountButton));
+
+        FileWriter writer = new FileWriter("accounts.json");
+        writer.write(PW_Application.AccountsJson.toJSONString());
+        writer.flush();
+        writer.close();
+    }
+
+    private void putAccountButton(AccountButton accountButton) {
+        JSONObject accountButtonJsonDetail = new JSONObject();
+        accountButtonJsonDetail.put("account", accountButton.getAccount());
+        accountButtonJsonDetail.put("id", accountButton.getID());
+        accountButtonJsonDetail.put("pw", accountButton.getPW());
+        accountButtonJsonDetail.put("additional", accountButton.getAdditional());
+
+        JSONObject accountButtonJson = new JSONObject();
+        accountButtonJson.put("accountButton", accountButtonJsonDetail);
+
+        PW_Application.AccountsJson.add(accountButtonJson);
+    }
+
 
 }
