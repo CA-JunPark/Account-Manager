@@ -1,6 +1,5 @@
 package com.example.passwordmanager;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -11,7 +10,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -261,8 +262,31 @@ public class Controller {
         }
     }
 
-    public void clickSave(){
+    public void clickSave() throws IOException {
+        FileChooser filechooser = new FileChooser();
+        filechooser.setTitle("Please locate the directory of the file");
+        filechooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+        filechooser.setInitialFileName("accounts.txt");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT", "*.txt");
+        filechooser.getExtensionFilters().add(extFilter);
+        File selectedFile = filechooser.showSaveDialog(PW_Application.scene.getWindow());
 
+        if (selectedFile != null){
+            FileWriter writer = new FileWriter(selectedFile);
+            for (int i = 0; i < PW_Application.Accounts.size(); i++){
+                writer.write(PW_Application.Accounts.get(i).toString());
+            }
+            writer.flush();
+            writer.close();
+        }
+    }
+
+    public void clickOpenTxt(){
+
+    }
+
+    public void clickClose(){
+        System.exit(0);
     }
 
     /** Password */
@@ -300,14 +324,6 @@ public class Controller {
                 Stage currentStage = (Stage) checkPwText.getScene().getWindow();
                 currentStage.close();
 
-                // read and refresh Accounts from json
-                readAccountsJson();
-                refreshAccountList();
-
-                // refresh accountList (VBox)
-
-                System.out.println(PW_Application.AccountsJson);
-                System.out.println(PW_Application.Accounts);
             } else {
                 // error message
                 AlertErrorWindow("Password Does Not Match");
@@ -316,8 +332,6 @@ public class Controller {
                 checkPwText.requestFocus();
             }
         }
-
-
     }
 
     public void openChangePwWindow() throws IOException {
@@ -430,7 +444,7 @@ public class Controller {
         PW_Application.AccountsJson.clear();
 
         // iterate Accounts(ArrayList) to create JSONArray
-        PW_Application.Accounts.forEach(accountButton -> putAccountButton(accountButton));
+        PW_Application.Accounts.forEach(this::putAccountButton);
 
         FileWriter writer = new FileWriter("accounts.json");
         writer.write(PW_Application.AccountsJson.toJSONString());
@@ -450,6 +464,4 @@ public class Controller {
 
         PW_Application.AccountsJson.add(accountButtonJson);
     }
-
-
 }
