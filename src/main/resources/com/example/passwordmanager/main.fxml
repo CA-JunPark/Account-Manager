@@ -23,10 +23,10 @@
          <menus>
             <Menu mnemonicParsing="false" text="File">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Save as txt file" />
-                  <MenuItem mnemonicParsing="false" text="Open txt file" />
+                  <MenuItem mnemonicParsing="false" onAction="#clickSave" text="Save as txt file" />
+                  <MenuItem mnemonicParsing="false" onAction="#clickOpenTxt" text="Open txt file" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Close" />
+                  <MenuItem mnemonicParsing="false" onAction="#clickClose" text="Close" />
                </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Password">
