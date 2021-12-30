@@ -50,8 +50,7 @@ public class BCryptPassword{
         // get current hashedPw
         JSONParser jsonParser = new JSONParser();
         FileReader reader = new FileReader("pw.json");
-        Object obj = jsonParser.parse(reader);
-        JSONObject pwJson = (JSONObject) obj;
+        JSONObject pwJson = (JSONObject) jsonParser.parse(reader);
         String hashedPw = (String) pwJson.get("password");
 
         return BCrypt.checkpw(enteredPw, hashedPw);

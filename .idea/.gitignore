@@ -8,3 +8,4 @@
 /httpRequests/
 /pw.json/
 /accounts.json/
+*.json
