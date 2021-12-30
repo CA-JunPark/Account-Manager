@@ -4,16 +4,19 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
-import java.io.IOException;
 
 public class PW_Application extends Application {
 
     public static Scene scene;
 
     public static ArrayList<AccountButton> Accounts = new ArrayList<>();
+
+    public static JSONArray AccountsJson = new JSONArray();
 
     public static boolean pwAccepted = false;
 
@@ -59,7 +62,11 @@ public class PW_Application extends Application {
         pwStage.showAndWait();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, ParseException {
+        // launch fx
         launch();
     }
+
+
+
 }

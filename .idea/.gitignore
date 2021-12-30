@@ -6,4 +6,5 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
-/pw.json
+/pw.json/
+/accounts.json/
