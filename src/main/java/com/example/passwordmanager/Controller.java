@@ -1,23 +1,26 @@
 package com.example.passwordmanager;
 
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -272,16 +275,45 @@ public class Controller {
         File selectedFile = filechooser.showSaveDialog(PW_Application.scene.getWindow());
 
         if (selectedFile != null){
+            // save txt file
             FileWriter writer = new FileWriter(selectedFile);
             for (int i = 0; i < PW_Application.Accounts.size(); i++){
                 writer.write(PW_Application.Accounts.get(i).toString());
             }
             writer.flush();
             writer.close();
+
+            // save recent file path as json
+            String recentFilePath = selectedFile.getAbsolutePath();
+            JSONObject recentFilePathJson = new JSONObject();
+            recentFilePathJson.put("filePath", recentFilePath);
+
+            FileWriter JSONWriter = new FileWriter("recentFilePath.json");
+            JSONWriter.write(recentFilePathJson.toJSONString());
+            JSONWriter.flush();
+            JSONWriter.close();
+
         }
     }
 
-    public void clickOpenTxt(){
+    public void clickOpenTxt() throws IOException, ParseException {
+        if (new File("recentFilePath.json").isFile()){
+            JSONParser parser = new JSONParser();
+            FileReader reader = new FileReader("recentFilePath.json");
+            JSONObject recentFilePathJson = (JSONObject) parser.parse(reader);
+            String recentFilePath = (String) recentFilePathJson.get("filePath");
+
+            File file = new File(recentFilePath);
+
+            if (file.isFile()){
+                Desktop.getDesktop().open(file);
+            }
+            else{
+                AlertErrorWindow("File Does Not Exist");
+            }
+        } else{
+            AlertErrorWindow("No Recent Location is Saved");
+        }
 
     }
 
