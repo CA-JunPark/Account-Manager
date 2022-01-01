@@ -36,7 +36,7 @@ public class AccountButton extends Button {
 
     public String toString(){
         return MessageFormat.format
-                ("{0} \nID: {1} \nPW: {2} \nAdditional Note:\n{3}\n",
+                ("{0} \nID: {1} \nPW: {2} \n{3}\n",
                         this.account, this.id, this.pw, this.additional);
     }
 
